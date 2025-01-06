@@ -21,7 +21,7 @@ Usage in Code
 
 import json
 
-STORAGE_FILE = "app/storage.json"
+STORAGE_FILE = "C:/Users/bpran/Desktop/FastAPI_Session/FastAPI_Tutorial/app/storage.json"
 
 def load_tasks():
     try:

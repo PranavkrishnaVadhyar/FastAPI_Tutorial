@@ -21,12 +21,13 @@ Usage in Code
 
 
 from fastapi import FastAPI
-from app.routes import router
+#from app.routes import router
 
 app = FastAPI()
 
-app.include_router(router)
+#app.include_router(router)
 
 @app.get("/")
+
 def root():
     return {"message": "Welcome to the To-Do List API!"}
