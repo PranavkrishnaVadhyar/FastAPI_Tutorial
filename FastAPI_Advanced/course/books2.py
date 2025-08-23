@@ -1,5 +1,7 @@
-from  fastapi import FastAPI
+from  fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
+from typing import Optional
+
 
 app = FastAPI()
 
@@ -26,12 +28,12 @@ BOOKS = [
     Book(6, 'HP3', 'Author 3', 'Book Description', 1)
 ]
 
-class CreateBook(BaseModel):
-    id: int 
-    title: str
-    author: str
-    description: str
-    rating: int
+class BookRequest(BaseModel):
+    id: Optional[int] = Field(description='ID is not needed on create', default=None)
+    title: str = Field(min_length=1)
+    author: str = Field(min_length=1, max_length=100)
+    description: str = Field(min_length=1, max_length=100)
+    rating: int = Field(gt=0, lt=6)
 
 
 @app.get('/books')
@@ -39,7 +41,39 @@ async def get_books():
     return BOOKS
 
 @app.post('/create_book')
-async def get_books(book_request: CreateBook):
+async def create_books(book_request: BookRequest):
     new_book = Book(**book_request.dict())
-    BOOKS.append(new_book)
+    BOOKS.append(find_book_id(new_book))
 
+
+def find_book_id(book:Book):
+    book.id == 1 if len(BOOKS) == 0 else book.id == (BOOKS[-1].id + 1)
+    return book
+
+
+@app.get("/book/{book_id}")
+async def get_book(book_id:int):
+    return BOOKS[book_id] 
+
+
+@app.get("/book/")
+async def read_by_rating(rating: int = Query(lt=6, gt=0)):
+    books = []
+    for book in BOOKS:
+        if book.rating == rating:
+            books.append(book)
+    return books
+
+@app.put("/update-book/")
+async def update_book(book: BookRequest):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].id == book.id:
+            BOOKS[i] = book
+
+
+@app.delete("/books/{book_id}")
+async def delete_book(book_id:int):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].id == book_id:
+            BOOKS.pop(i)
+            break
